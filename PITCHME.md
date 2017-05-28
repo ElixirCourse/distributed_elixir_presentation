@@ -66,8 +66,8 @@ Node.monitor(some_node, true)
 
 #HSLIDE
 ```bash
-iex --sname andi \
-  --erl "-kernel inet_dist_listen_min 54300 inet_dist_listen_max 54400"
+iex --sname andi --erl \
+  "-kernel inet_dist_listen_min 54300 inet_dist_listen_max 54400"
 ```
 
 #HSLIDE
