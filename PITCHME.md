@@ -66,7 +66,8 @@ Node.monitor(some_node, true)
 
 #HSLIDE
 ```bash
-iex --sname andi --erl "-kernel inet_dist_listen_min 54300 inet_dist_listen_max 54400"
+iex --sname andi \
+  --erl "-kernel inet_dist_listen_min 54300 inet_dist_listen_max 54400"
 ```
 
 #HSLIDE
@@ -77,7 +78,10 @@ iex --sname andi --erl "-kernel inet_dist_listen_min 54300 inet_dist_listen_max 
 ```elixir
 # От valo@meddland
 
-Node.spawn(:meddle@meddland, fn -> send(pid(0, 86, 0), "Hello from valo!") end)
+Node.spawn(
+  :meddle@meddland,
+  fn -> send(pid(0, 86, 0), "Hello from valo!") end
+)
 # #PID<9107.110.0>
 ```
 
@@ -107,6 +111,8 @@ binary_pid = :erlang.term_to_binary(pid)
 
 #HSLIDE
 ## Дистрибутирани програми - проблемите
+
+#HSLIDE
 ![Image-Absolute](assets/nothing.png)
 
 #HSLIDE
