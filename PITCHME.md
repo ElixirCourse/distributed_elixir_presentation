@@ -42,7 +42,7 @@ Node.monitor(some_node, true)
 * Отдолу работим с процеси. <!-- .element: class="fragment" -->
 * :rpc.call и :rpc.cast. <!-- .element: class="fragment" -->
 * async_call, yield и nb_yield. <!-- .element: class="fragment" -->
-* multicall и multicast. <!-- .element: class="fragment" -->
+* multicall и eval_everywhere <!-- .element: class="fragment" -->
 
 #HSLIDE
 ## EPMD
