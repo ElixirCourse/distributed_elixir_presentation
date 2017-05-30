@@ -128,5 +128,8 @@ binary_pid = :erlang.term_to_binary(pid)
 * Мрежата няма определен формат. Трябва ние да определим формат и протокол. <!-- .element: class="fragment" -->
 
 #HSLIDE
+![Image-Absolute](assets/ouroboros.jpg)
+
+#HSLIDE
 ## Край...
 ![Image-Absolute](assets/end.jpg)
