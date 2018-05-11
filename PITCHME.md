@@ -1,80 +1,162 @@
-#HSLIDE
+---
 ## Дистрибутиран Elixir
 
-#HSLIDE
+---
 ![Image-Absolute](assets/title.jpg)
 
-#HSLIDE
+---
+### Съдържание
+
+1. Какво означава да сме дистрибутирани?
+2. Node-ове и функции за свързване и комуникация
+3. Проблемите на дистрибутираните системи
+4. Да си напишем чат!
+5. Да помислим за проблеми с чата...
+6. Тестване на дистрибутиран Elixir
+7. Кога да ползваме дистрибутиран Elixir
+
+---
 * Дистрибутираност значи програмата ни да върви на повече от една виртуални машини.
-* Elixir ни дава добри инструменти за постигане на това. <!-- .element: class="fragment" -->
+* Elixir ни дава добри инструменти за постигане на това. |
 
-#HSLIDE
-* Виртуалните машини на Elang/Elixir наричаме nodes.
-* Един node е една виртуална машина. <!-- .element: class="fragment" -->
-* Те може да са отворени за комуникация с други node-ове или не. <!-- .element: class="fragment" -->
+---
+* Виртуалните машини на Elang/Elixir наричаме ноудове (nodes).
+* Един node е една виртуална машина. |
+* Те може да са отворени за комуникация с други ноудове или не. |
 
-#HSLIDE
+---
 ### Функции за статус на node
-* Как да видим името на node-a си? <!-- .element: class="fragment" -->
-* Как да направим node-а си 'жив'? <!-- .element: class="fragment" -->
 
-#HSLIDE
+* Как да видим името на node-a си? |
+* Как да направим node-а си 'жив'? |
+
+---
 ### Свързване на node-ове
-* Списък на свързаните node-ове. <!-- .element: class="fragment" -->
-* Свързване на node-ове. <!-- .element: class="fragment" -->
-* Връзките между node-ове са транзитивни. <!-- .element: class="fragment" -->
 
-#HSLIDE
+* Списък на свързаните node-ове. |
+* Свързване на node-ове. |
+* Връзките между node-ове са транзитивни. |
+
+---
 ### Създаване на процеси на отдалечени node-ове
-* Node.spawn и неговите версии. <!-- .element: class="fragment" -->
-* Основата на комуникацията между node-ове са процесите. <!-- .element: class="fragment" -->
+* Node.spawn и неговите версии. |
+* Основата на комуникацията между node-ове са процесите. |
 
-#HSLIDE
+---
+```elixir
+# @slavi
+defmodule DB do
+  def tell_us_secret do
+    IO.puts("Познавам всички и всеки!")
+  end
+end
+```
+
+```elixir
+# @valo
+Node.spawn(:slavi@meddland, DB, :tell_us_secret, [])
+#output: Познавам всички и всеки!
+#=> #PID<9473.144.0>
+```
+
+---
 ### Наблюдаване на Node-ове
 
 ```elixir
 Node.monitor(some_node, true)
 ```
 
-#HSLIDE
+---
 ### Извикване на отдалечени функции
-* Използва се Erlang модула :rpc. <!-- .element: class="fragment" -->
-* Отдолу работим с процеси. <!-- .element: class="fragment" -->
-* :rpc.call и :rpc.cast. <!-- .element: class="fragment" -->
-* async_call, yield и nb_yield. <!-- .element: class="fragment" -->
-* multicall и eval_everywhere <!-- .element: class="fragment" -->
+* Използва се Erlang модула :rpc. |
+* Отдолу работим с процеси. |
 
-#HSLIDE
+---
+:rpc.call/4 (Има и cast версия)
+
+```elixir
+# @valo
+
+:rpc.call(:slavi@meddland, DB, :tell_us_secret, [])
+#=> Познавам всички и всеки!
+#=> :ok
+```
+
+---
+async_call и yield
+
+```elixir
+# @valo
+pid = :rpc.async_call(:meddle@meddland, Enum, :sort, [(1..2_000_000) |> Enum.shuffle])
+#=> #PID<0.115.0>
+
+# Това няма да забие текущия процес докато резултата е готов.
+
+:rpc.yield(pid)
+# Ще чака за резултат, или ако е готов ще го върне - сортиран списък от два милиона числа.
+```
+
+---
+nb_yield
+
+```elixir
+# @valo
+pid = :rpc.async_call(:slavi@meddland, Process, :sleep, [50_000])
+#=> #PID<0.108.0>
+
+# По подразбиране timeout-a е нула: пробва и ако няма резултат - :timeout
+:rpc.nb_yield(pid)
+#=> :timeout
+:rpc.nb_yield(pid, 1_000)
+#=> :timeout
+
+:rpc.nb_yield(pid, 50_000)
+#=> {:value, :ok}
+```
+
+---
+multicall и eval_everywhere
+
+```elixir
+# @slavi
+Node.list()
+#=> [:meddle@meddland, :valo@meddland]
+
+:rpc.multicall([Node.self() | Node.list()], Node, :self, [])
+#=> {[:slavi@meddland, :meddle@meddland, :valo@meddland], []}
+```
+
+---
 ## EPMD
 ![Image-Absolute](assets/epmd.jpg)
 
-#HSLIDE
+---
 * Когато стартираме node с име или пък му дадем име в последствие, той ще се свърже към програма, наречена EPMD или Erlang Port Mapper Daemon.
 * Такава програма върви на всеки компютър на който има поне един 'жив' Erlang или Elixir node.
 
-#HSLIDE
+---
 * EPMD е нещо като сървър за имена, който позволява регистриране, комуникация и връзка между node-ове.
-* EPMD map-ва имена на node-ове към машинни адреси. <!-- .element: class="fragment" -->
-* Програмата пази само name частта от name@host, защото си знае хоста. <!-- .element: class="fragment" -->
+* EPMD map-ва имена на node-ове към машинни адреси. |
+* Програмата пази само name частта от name@host, защото си знае хоста. |
 
-#HSLIDE
+---
 ### Кога се стартира EPMD?
 
-* Ако няма вървящ EPMD и стартираме node с име, автоматично се стартира. <!-- .element: class="fragment" -->
-* Портът му по подразбиране е 4369, но може да се конфигурира друг. <!-- .element: class="fragment" -->
-* Не е добра идея, защото Ericsson са го регистрирати официално за EPMD и би трябвало да е свободен. <!-- .element: class="fragment" -->
+* Ако няма вървящ EPMD и стартираме node с име, автоматично се стартира. |
+* Портът му по подразбиране е 4369, но може да се конфигурира друг. |
+* Не е добра идея, защото Ericsson са го регистрирати официално за EPMD и би трябвало да е свободен. |
 
-#HSLIDE
+---
 ```bash
 iex --sname andi --erl \
   "-kernel inet_dist_listen_min 54300 inet_dist_listen_max 54400"
 ```
 
-#HSLIDE
+---
 ## PID
 ![Image-Absolute](assets/pid.jpg)
 
-#HSLIDE
+---
 ```elixir
 # От valo@meddland
 
@@ -85,51 +167,55 @@ Node.spawn(
 # #PID<9107.110.0>
 ```
 
-#HSLIDE
+---
 * Това, което Node.spawn/2 връща е pid, но изглежда малко странно.
-* Свикнали сме първото число да е 0, а тук не е. <!-- .element: class="fragment" -->
-* Това е така защото първото число на pid-а е свързано с node-а, на който процеса му се изпълнява. <!-- .element: class="fragment" -->
+* Свикнали сме първото число да е 0, а тук не е. |
+* Това е така защото първото число на pid-а е свързано с node-а, на който процеса му се изпълнява. |
 
-#HSLIDE
+---
 * Ако процесът върви на текущия node, то винаги е 0.
-* Ако обаче процесът върви на друг node, числото уникално ще идентифицира този друг node. <!-- .element: class="fragment" -->
-* Тази стойност за един и същи node ще е различна на различни node-ове, свързани с него. <!-- .element: class="fragment" -->
+* Ако обаче процесът върви на друг node, числото уникално ще идентифицира този друг node. |
+* Тази стойност за един и същи node ще е различна на различни node-ове, свързани с него. |
 
-#HSLIDE
+---
 ### Типа данни PID
 
 * Първото число на pid показва на кой node върви процеса.
 * Второто е брояч, а третото допълнение към този брояч.
 * Когато минем максималния брой процеси за дадения node, третото число се увеличава с едно.
 
-#HSLIDE
+---
 ### Демонстрация
 
 ```elixir
 binary_pid = :erlang.term_to_binary(pid)
 ```
 
-#HSLIDE
+---
 ## Дистрибутирани програми - проблемите
 
-#HSLIDE
+---
 ![Image-Absolute](assets/nothing.png)
 
-#HSLIDE
+---
 * На мрежата не винаги може да се разчита. Node-ове могат да изчезнат.
-* Мрежата може да бъде бавна от време на време. Резултатите от извиквания могат да се забавят. <!-- .element: class="fragment" -->
-* Bandwidth. Малки и прости съобщения! <!-- .element: class="fragment" -->
-* Security. Това трябва да си го постигнем сами! <!-- .element: class="fragment" -->
+* Мрежата може да бъде бавна от време на време. Резултатите от извиквания могат да се забавят. |
+* Bandwidth. Малки и прости съобщения! |
+* Security. Това трябва да си го постигнем сами! |
 
-#HSLIDE
+---
 * Топологията на мрежата не е константа - имена и локации - трябва да внимаваме.
-* Рядко ние имаме пълен контрол над физическите машини в мрежата. <!-- .element: class="fragment" -->
-* Транспортът е скъп. Малки, прости съобщения! <!-- .element: class="fragment" -->
-* Мрежата няма определен формат. Трябва ние да определим формат и протокол. <!-- .element: class="fragment" -->
+* Рядко ние имаме пълен контрол над физическите машини в мрежата. |
+* Транспортът е скъп. Малки, прости съобщения! |
+* Мрежата няма определен формат. Трябва ние да определим формат и протокол. |
 
-#HSLIDE
+---
+### CAP
+![Image-Absolute](assets/scalability-cap-theorem1.png)
+
+---
+![Image-Absolute](assets/chap1_cap_theorem.png)
+
+---
+### Coding Time!
 ![Image-Absolute](assets/ouroboros.jpg)
-
-#HSLIDE
-## Край...
-![Image-Absolute](assets/end.jpg)
