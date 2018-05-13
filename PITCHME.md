@@ -87,13 +87,16 @@ async_call и yield
 
 ```elixir
 # @valo
-pid = :rpc.async_call(:meddle@meddland, Enum, :sort, [(1..2_000_000) |> Enum.shuffle])
+pid = :rpc.async_call(:meddle@meddland,
+                      Enum,
+                      :sort,
+                      [(1..2_000_000) |> Enum.shuffle])
 #=> #PID<0.115.0>
 
 # Това няма да забие текущия процес докато резултата е готов.
 
 :rpc.yield(pid)
-# Ще чака за резултат, или ако е готов ще го върне - сортиран списък от два милиона числа.
+# Ще чака за резултат, или ако е готов ще го върне
 ```
 
 ---
