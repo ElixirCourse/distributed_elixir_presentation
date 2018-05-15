@@ -107,7 +107,8 @@ nb_yield
 pid = :rpc.async_call(:slavi@meddland, Process, :sleep, [50_000])
 #=> #PID<0.108.0>
 
-# По подразбиране timeout-a е нула: пробва и ако няма резултат - :timeout
+# По подразбиране timeout-a е нула.
+# Пробва и ако няма резултат - :timeout
 :rpc.nb_yield(pid)
 #=> :timeout
 :rpc.nb_yield(pid, 1_000)
@@ -196,6 +197,8 @@ binary_pid = :erlang.term_to_binary(pid)
 
 ---
 ## Дистрибутирани програми - проблемите
+
+---
 ![Image-Absolute](assets/fallacies-fallacies-one-for-you-and-two-for-me.jpg)
 
 ---
