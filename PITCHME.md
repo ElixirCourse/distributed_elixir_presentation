@@ -196,6 +196,7 @@ binary_pid = :erlang.term_to_binary(pid)
 
 ---
 ## Дистрибутирани програми - проблемите
+![Image-Absolute](assets/fallacies-fallacies-one-for-you-and-two-for-me.jpg)
 
 ---
 * На мрежата не винаги може да се разчита. Node-ове могат да изчезнат.
@@ -215,6 +216,9 @@ binary_pid = :erlang.term_to_binary(pid)
 
 ---
 ![Image-Absolute](assets/chap1_cap_theorem.png)
+
+---
+![Image-Absolute](assets/25518fed78bdf02cec9041d90c00bd5f--jesse-pinkman-aaron-paul.jpg)
 
 ---
 ### Coding Time!
